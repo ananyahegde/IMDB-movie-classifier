@@ -1,0 +1,6 @@
+data/raw/
+data/processed
+.pkl
+.venv/
+.idea/
+.ipynb_checkpoints/
