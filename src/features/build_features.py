@@ -1,15 +1,15 @@
+import os
+import pickle
+import time
+from definitions import ROOT_DIR
+import numpy as np
+from scipy.sparse import vstack
+from .count_vectorizer import Count_Vectorizer
+from .tfidf_vectorizer import Tfidf_Vectorizer
+from .word2vec_vectorizer import Word2vec_Vectorizer
+
 def run_main():
-    import os
-    import pickle
-    import time
-    import numpy as np
-    from scipy.sparse import vstack
-    from .count_vectorizer import Count_Vectorizer
-    from .tfidf_vectorizer import Tfidf_Vectorizer
-    from .word2vec_vectorizer import Word2vec_Vectorizer
-
-
-    os.chdir('C:/Users/Anany/Wo Maschinen lernen/Text Classification of IMDB Reviews')
+    os.chdir(ROOT_DIR)
 
     with open('data/processed/train/tokens/pos_reviews_tokens.pkl', 'rb') as file:
         pos_reviews = pickle.load(file)

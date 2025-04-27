@@ -1,13 +1,15 @@
-def run_main():
-    import os
-    import pickle
-    import time
-    from .load import load_data
-    from .preprocess import process_data
-    from .preprocess import download_resources
+import os
+import pickle
+import time
+from definitions import ROOT_DIR
+from .load import load_data
+from .preprocess import process_data
+from .preprocess import download_resources
 
+
+def run_main():
     # setting the working directory
-    os.chdir('C:/Users/Anany/Wo Maschinen lernen/Text Classification of IMDB Reviews')
+    os.chdir(ROOT_DIR)
 
     # Load data
     t1 = time.perf_counter()
