@@ -1,8 +1,9 @@
 import os
 import pickle
+from definitions import ROOT_DIR
 from sklearn.naive_bayes import MultinomialNB
 
-os.chdir('C:/Users/Anany/Wo Maschinen lernen/Text Classification of IMDB Reviews')
+os.chdir(ROOT_DIR)
 
 with open("data/processed/train/embeddings/count_vectors.pkl", "rb") as file:
     features = pickle.load(file)
@@ -19,3 +20,8 @@ from sklearn.model_selection import cross_val_score
 
 scores = cross_val_score(mnb, features, labels, cv=5)
 print(scores)
+
+with open('model/multinomial_naive_bayes.pkl', 'wb') as file:
+    pickle.dump(mnb)
+
+
