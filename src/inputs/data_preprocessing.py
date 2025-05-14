@@ -6,7 +6,6 @@ from .load import load_data
 from .preprocess import process_data
 from .preprocess import download_resources
 
-
 def run_main():
     # setting the working directory
     os.chdir(ROOT_DIR)
