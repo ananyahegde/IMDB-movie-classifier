@@ -1,6 +1,7 @@
 import os
 import re
 import time
+from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 
 class Load:
@@ -19,7 +20,7 @@ class Load:
 
         filepaths = [os.path.join(dir_path, f) for f in filenames]
         with ThreadPoolExecutor() as executor:
-            texts = list(executor.map(self.read_file, filepaths))
+            texts = list(tqdm(executor.map(self.read_file, filepaths), total=len(filepaths)))
 
         self.t2 = time.perf_counter()
         print(f"Finished in {round(self.t2 - self.t1, 4)} second(s).")

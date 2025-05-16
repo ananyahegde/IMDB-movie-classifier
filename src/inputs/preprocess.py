@@ -1,6 +1,7 @@
 import string
 import time
 import concurrent.futures
+from tqdm import tqdm
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -47,7 +48,9 @@ class Preprocess:
         self.t1 = time.perf_counter()
 
         with concurrent.futures.ThreadPoolExecutor() as exe:
-            preprocessed_text = [exe.submit(self.preprocess_pipeline, text).result() for text in texts]
+            preprocessed_text = list(
+                tqdm((exe.submit(self.preprocess_pipeline, text).result() for text in texts), total=len(texts))
+            )
 
         self.t2 = time.perf_counter()
         print(f"Finished in {round(self.t2 - self.t1, 4)} second(s).")

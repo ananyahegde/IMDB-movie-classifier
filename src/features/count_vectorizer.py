@@ -1,15 +1,21 @@
 from sklearn.feature_extraction.text import CountVectorizer
+import warnings
 
-def dummy(doc):
-    return doc
+class Countvectorizer:
+    def __init__(self):
+        print("vectorizing..")
+        warnings.simplefilter('ignore')
 
-def Count_Vectorizer(tokens):
-    vectorizer = CountVectorizer(
-        tokenizer=dummy,
-        preprocessor=dummy,
-    )
+    def dummy(self, doc):
+        return doc
 
-    vectorizer.fit(tokens)
-    vectors = vectorizer.transform(tokens)
+    def count_vectorizer(self, tokens):
+        vectorizer = CountVectorizer(
+            tokenizer=self.dummy,
+            preprocessor=self.dummy
+        )
 
-    return vectors
+        vectorizer.fit(tokens)
+        vectors = vectorizer.transform(tokens)
+
+        return vectors
