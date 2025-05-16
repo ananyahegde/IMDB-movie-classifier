@@ -1,5 +1,6 @@
 from sklearn.feature_extraction.text import CountVectorizer
 import warnings
+from tqdm import tqdm
 
 class Countvectorizer:
     def __init__(self):
