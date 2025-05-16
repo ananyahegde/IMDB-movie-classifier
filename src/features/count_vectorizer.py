@@ -16,6 +16,6 @@ class Countvectorizer:
         )
 
         vectorizer.fit(tokens)
-        vectors = vectorizer.transform(tokens)
+        vectors = vectorizer.transform(tqdm((tokens), total=len(tokens)))
 
         return vectors
