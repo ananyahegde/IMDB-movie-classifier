@@ -3,11 +3,10 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 from scipy.stats import uniform, randint
-from tqdm import tqdm
 import warnings
 
 
-class Countvectorizer:
+class countVectorizer:
     def __init__(self):
         print("vectorizing..")
         warnings.simplefilter('ignore')
@@ -35,11 +34,11 @@ class Countvectorizer:
         random_search = RandomizedSearchCV(
             pipe,
             param_distributions=param_dist,
-            n_iter=5,
+            n_iter=3,
             cv=5,
             scoring='accuracy',
             n_jobs=1,
-            verbose=2,
+            verbose=0,
             random_state=42
         )
 
@@ -48,4 +47,4 @@ class Countvectorizer:
         best_vectorizer = random_search.best_estimator_.named_steps['vect']
         vectors = best_vectorizer.transform(tokens)
 
-        return vectors
+        return best_vectorizer, vectors
