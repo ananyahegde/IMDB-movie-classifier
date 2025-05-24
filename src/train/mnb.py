@@ -2,6 +2,7 @@ import os
 import pickle
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import cross_val_score, StratifiedKFold
+from sklearn.metrics import confusion_matrix
 from sklearn.utils import shuffle
 from tqdm import tqdm
 from definitions import ROOT_DIR
@@ -10,7 +11,9 @@ from src.inputs.preprocess import Preprocess
 from src.features.count_vectorizer import countVectorizer
 from src.features.label_encoder import labelEncoder
 
+
 os.chdir(ROOT_DIR)
+
 
 path_to_train_pos_data = 'data/raw/train/pos'
 path_to_train_neg_data = 'data/raw/train/neg'
@@ -34,27 +37,38 @@ processed_train_data = processed_train_pos + processed_train_neg
 processed_train_data, labels = shuffle(processed_train_data, labels)
 
 vectorizer = countVectorizer()
-features = vectorizer.count_vectorizer(processed_data, labels)
+best_count_vectorizer, features = vectorizer.count_vectorizer(processed_train_data, labels)
 
 mnb = MultinomialNB()
 mnb.fit(features, labels)
+
 score = mnb.score(features, labels)
-print("Naive Bayes Score: ", score)
+print("Naive Bayes Score:", score)
+
+train_preds = mnb.predict(features)
+train_cm = confusion_matrix(labels, train_preds)
+print(f"Confusion matrix for train predictions:\n {train_cm}")
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scores = cross_val_score(mnb, features, labels, cv=cv)
-
 print("CV Scores:", scores)
-print(f"Mean Score: {scores.mean()}:.4f")
+print(f"Mean Score: {scores.mean():.4f}")
+
+with open('models/best_count_vectorizer.pkl', 'wb') as file:
+    pickle.dump(best_count_vectorizer, file)
+
+with open('models/multinomial_naive_bayes.pkl', 'wb') as file:
+    pickle.dump(mnb, file)
 
 
-# If you want to save the model
+path_to_test_pos_data = 'data/raw/test/pos'
+path_to_test_neg_data = 'data/raw/test/neg'
 
-# with open('model/multinomial_naive_bayes.pkl', 'wb') as file:
-# pickle.dump(mnb)
+with open('models/best_count_vectorizer.pkl', 'rb') as file:
+    best_count_vectorizer = pickle.load(file)
 
-path_to_train_pos_data = 'data/raw/test/pos'
-path_to_train_neg_data = 'data/raw/test/neg'
+with open('models/multinomial_naive_bayes.pkl', 'rb') as file:
+    mnb = pickle.load(file)
 
 print("____________Testing the model____________")
 
@@ -72,4 +86,14 @@ processed_test_pos = preprocess.process_data(raw_test_pos)
 processed_test_neg = preprocess.process_data(raw_test_neg)
 
 processed_test_data = processed_test_pos + processed_test_neg
-processed_test_data, labels = shuffle(processed_test_data, labels)
+processed_test_data, test_labels = shuffle(processed_test_data, test_labels)
+
+test_features = best_count_vectorizer.transform(processed_test_data)
+
+mnb_test_score = mnb.score(test_features, test_labels)
+print(f"Naive Bayes test score: {mnb_test_score}")
+
+test_preds = mnb.predict(test_features)
+test_cm = confusion_matrix(test_labels, test_preds)
+print(f"Confusion matrix for test predictions:\n {test_cm}")
+
