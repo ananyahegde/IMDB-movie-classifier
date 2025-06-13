@@ -146,4 +146,4 @@ for epoch in range(EPOCHS):
         loop.set_postfix(accuracy = float(acc),
                             loss = loss.item())
 
-torch.save(model.state_dict(), "models/imdb.pth")
+torch.save(model.state_dict(), "models/LSTM.pth")
