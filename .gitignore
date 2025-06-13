@@ -1,7 +1,10 @@
-data/raw/
-data/processed
-.pkl
 .venv/
 .idea/
 .ipynb_checkpoints/
 **/__pycache__/
+data/raw/
+data/processed
+data/interim
+models/
+.pth
+.pkl

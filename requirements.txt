@@ -1,1 +1,9 @@
-scikit-learn
+nltk==3.8.1
+numpy==2.2.6
+pandas==2.2.3
+scikit_learn==1.6.1
+scipy==1.15.3
+torch==2.6.0
+tqdm==4.66.1
+auto_mix_prep==0.2.0
+definitions==0.2.0
