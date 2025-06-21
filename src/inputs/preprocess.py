@@ -9,7 +9,8 @@ from nltk.corpus import stopwords
 
 class Preprocess:
     def __init__(self):
-        print("preprocessing data...")
+        print("\npreprocessing data...")
+
     def download_resources(self):
         print("downloading resources...")
         nltk.download('punkt', quiet=True)

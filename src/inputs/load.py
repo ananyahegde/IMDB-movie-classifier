@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 class Load:
     def __init__(self):
-        print('importing data...')
+        print('\nimporting data...')
 
     def read_file(self, filepath):
         with open(filepath, 'r', encoding='utf-8') as f:

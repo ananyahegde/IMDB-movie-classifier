@@ -9,7 +9,7 @@ from definitions import ROOT_DIR
 from src.inputs.load import Load
 from src.inputs.preprocess import Preprocess
 from src.features.count_vectorizer import countVectorizer
-from src.features.label_encoder import labelEncoder
+from src.features.binary_mapping import labelEncoder
 
 
 os.chdir(ROOT_DIR)
