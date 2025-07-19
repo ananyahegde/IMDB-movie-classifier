@@ -63,9 +63,13 @@ class BiLSTM(nn.Module):
         self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=pad_idx)
         self.embed_dropout = nn.Dropout(0.4)
         self.lstm = nn.LSTM(embed_dim, hidden_dim, batch_first=True, bidirectional=True)
+<<<<<<< HEAD:src/train/bilstm.py
         self.layer_norm = nn.LayerNorm(hidden_dim * 2)
         self.dropout = nn.Dropout(0.6)
         self.fc = nn.Linear(hidden_dim * 2, output_dim)
+=======
+        self.fc = nn.Linear(hidden_dim, output_dim)
+>>>>>>> parent of 8bd9ae5 (final training regime):src/train/lstm.py
 
     def forward(self, x):
         embedded = self.embed_dropout(self.embedding(x))
