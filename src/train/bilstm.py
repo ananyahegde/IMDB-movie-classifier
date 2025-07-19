@@ -1,8 +1,3 @@
-"""
-Train distribution: Counter({0: 7384, 3: 6995, 2: 5505, 1: 5116})
-Test distribution: Counter({3: 7343, 0: 7324, 1: 5176, 2: 5157})
-"""
-
 import os
 import pandas as pd
 import numpy as np
