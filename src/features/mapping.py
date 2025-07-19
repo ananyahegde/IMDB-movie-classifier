@@ -6,4 +6,3 @@ class labelEncoder:
             return 1 # positive
         else:
             return 2 # Neutral
-        
