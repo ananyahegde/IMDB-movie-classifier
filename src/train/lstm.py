@@ -63,13 +63,10 @@ class BiLSTM(nn.Module):
         self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=pad_idx)
         self.embed_dropout = nn.Dropout(0.4)
         self.lstm = nn.LSTM(embed_dim, hidden_dim, batch_first=True, bidirectional=True)
-<<<<<<< HEAD:src/train/bilstm.py
         self.layer_norm = nn.LayerNorm(hidden_dim * 2)
         self.dropout = nn.Dropout(0.6)
         self.fc = nn.Linear(hidden_dim * 2, output_dim)
-=======
         self.fc = nn.Linear(hidden_dim, output_dim)
->>>>>>> parent of 8bd9ae5 (final training regime):src/train/lstm.py
 
     def forward(self, x):
         embedded = self.embed_dropout(self.embedding(x))
@@ -238,17 +235,14 @@ if not (os.path.exists('models/BiLSTM_SK5Fold_best.pth') and os.path.getsize('mo
             val_acc = round(float(val_correct) / val_total * 100, 2)
             avg_val_loss = val_loss / len(val_loader)
 
-            # Store validation metrics for this epoch
             val_fold_accuracies.append(val_acc)
             val_fold_losses.append(avg_val_loss)
 
-            # Use average loss for scheduler and early stopping
             scheduler.step(avg_val_loss)
             curr_lr = scheduler.get_last_lr()
 
             print(f"Validation Accuracy: {val_acc} | Validation Loss: {avg_val_loss:.4f} | Learning Rate: {curr_lr}\n")
 
-            # Use average loss for early stopping and best model tracking
             if avg_val_loss < best_val_loss:
                 best_val_loss = avg_val_loss
                 best_model_state = model.state_dict().copy()
