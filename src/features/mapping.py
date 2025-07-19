@@ -5,4 +5,4 @@ class labelEncoder:
         elif score >= 7:
             return 1 # positive
         else:
-            return 2 # Neutral
+            return 2

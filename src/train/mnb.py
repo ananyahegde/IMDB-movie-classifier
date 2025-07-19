@@ -2,14 +2,14 @@ import os
 import pickle
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import cross_val_score, StratifiedKFold
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, precision_score, recall_score
 from sklearn.utils import shuffle
 from tqdm import tqdm
 from definitions import ROOT_DIR
 from src.inputs.load import Load
 from src.inputs.preprocess import Preprocess
 from src.features.count_vectorizer import countVectorizer
-from src.features.binary_mapping import labelEncoder
+from src.features.mapping import labelEncoder
 
 
 os.chdir(ROOT_DIR)
@@ -17,11 +17,12 @@ os.chdir(ROOT_DIR)
 path_to_train_pos_data = 'data/raw/train/pos'
 path_to_train_neg_data = 'data/raw/train/neg'
 
-print("____________Training the model____________")
 
 if not (os.path.exists('data/interim/mnb_features.pkl') and os.path.getsize('data/interim/mnb_features.pkl') > 0) \
         or not (os.path.exists('data/interim/mnb_labels.pkl') and os.path.getsize('data/interim/mnb_labels.pkl') > 0) \
         or not (os.path.exists('models/best_count_vectorizer.pkl') and os.path.getsize('models/best_count_vectorizer.pkl') > 0):
+
+    print("____________Training the model____________")
 
     load = Load()
     raw_train_pos, train_pos_labels = load.load_data(path_to_train_pos_data)
@@ -58,25 +59,34 @@ else:
     with open('data/interim/mnb_labels.pkl', 'rb') as file:
         labels = pickle.load(file)
 
+print("\n\n____________Train Predictions____________")
 
 mnb = MultinomialNB()
 mnb.fit(features, labels)
+train_preds = mnb.predict(features)
 
 score = mnb.score(features, labels)
 print("Naive Bayes Score:", score)
-
-train_preds = mnb.predict(features)
-train_cm = confusion_matrix(labels, train_preds)
-print(f"Confusion matrix for train predictions:\n {train_cm}")
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scores = cross_val_score(mnb, features, labels, cv=cv)
 print("CV Scores:", scores)
 print(f"Mean Score: {scores.mean():.4f}")
 
+train_precision = precision_score(labels, train_preds)
+print(f"Train precision score: {round(train_precision, 4)}")
+
+train_recall = recall_score(labels, train_preds)
+print(f"Train recall score: {train_recall}")
+
+train_cm = confusion_matrix(labels, train_preds)
+print(f"Confusion matrix for train predictions:\n {train_cm}")
+
 with open('models/multinomial_naive_bayes.pkl', 'wb') as file:
     pickle.dump(mnb, file)
 
+
+# testing
 
 path_to_test_pos_data = 'data/raw/test/pos'
 path_to_test_neg_data = 'data/raw/test/neg'
@@ -87,7 +97,7 @@ if not (os.path.exists('data/interim/mnb_test_features.pkl') and os.path.getsize
     with open('models/best_count_vectorizer.pkl', 'rb') as file:
         best_count_vectorizer = pickle.load(file)
 
-    print("____________Testing the model____________")
+    print("\n\n____________Testing the model____________")
 
     load = Load()
     raw_test_pos, test_pos_labels = load.load_data(path_to_test_pos_data)
@@ -122,9 +132,18 @@ else:
     with open('models/multinomial_naive_bayes.pkl', 'rb') as file:
         mnb = pickle.load(file)
 
+print("\n\n____________Test Predictions____________")
+
+test_preds = mnb.predict(test_features)
+
 mnb_test_score = mnb.score(test_features, test_labels)
 print(f"Naive Bayes test score: {mnb_test_score}")
 
-test_preds = mnb.predict(test_features)
+test_precision = precision_score(test_labels, test_preds)
+print(f"Test precision score: {test_precision}")
+
+test_recall = recall_score(test_labels, test_preds)
+print(f"Test recall score: {test_recall}")
+
 test_cm = confusion_matrix(test_labels, test_preds)
 print(f"Confusion matrix for test predictions:\n {test_cm}")
