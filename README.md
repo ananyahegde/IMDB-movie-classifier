@@ -30,27 +30,27 @@ This is a movie review sentiment classifier built using both machine learning an
 
 ### Example Usage 
 
-!(screenshots/bilstm_pos.png)  
+![](screenshots/bilstm_pos.png)  
 *BiLSTM - Postive Review.*
 
 
-!(screenshots/bilstm_neg.png)  
+![](screenshots/bilstm_neg.png)  
 *BiLSTM - Negative Review.*
 
 
-!(screenshots/bilstm_neu.png)  
+![](screenshots/bilstm_neu.png)  
 *BiLSTM - Neutral Review.*
 
 
-!(screenshots/nb_pos.png)  
+![](screenshots/nb_pos.png)  
 *Naive Bayes - Postive Review.*
 
 
-!(screenshots/nb_neg.png)  
+![](screenshots/nb_neg.png)  
 *Naive Bayes - Negative Review.*
 
 
-!(screenshots/nb_neu.png)  
+![](screenshots/nb_neu.png)  
 *Naive Bayes - Neutral Review.*
 
 ## 🔧 Installation
