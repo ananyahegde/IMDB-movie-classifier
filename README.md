@@ -1,4 +1,4 @@
-# 🎬 Movie Review Analyzer
+# 🎬 Movie Review Classifier
 This is a movie review sentiment classifier built using both machine learning and deep learning techniques. It combines a fast Naive Bayes model with a context-aware BiLSTM to provide reliable classification. The tool runs locally and includes a simple, interactive web interface for input and results.
 
 ## ⚡ Features
