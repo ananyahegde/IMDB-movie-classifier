@@ -131,6 +131,26 @@
         .error-card {
             background: linear-gradient(135deg, #f87171, #ef4444);
         }
+        
+        .model-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        
+        .model-naive-bayes {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        
+        .model-bilstm {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
     </style>
 </head>
 <body class="min-h-screen gradient-bg">
@@ -149,7 +169,7 @@
     </div>
 
     <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-2xl">
+        <div class="w-full max-w-4xl">
             <!-- Header -->
             <div class="text-center mb-12">
                 <div class="inline-block p-4 glass-effect rounded-2xl mb-6 animate-float">
@@ -165,7 +185,27 @@
 
             <!-- Main Card -->
             <div class="glass-effect rounded-3xl p-8 shadow-2xl backdrop-blur-lg">
-                <div class="space-y-6">
+                <div class="space-y-6">                    
+                    <div class="flex justify-end mb-4">
+                        <div class="text-right">
+                            <label for="modelSelect" class="block text-sm font-medium text-white/80 mb-1">
+                                <i class="fas fa-robot mr-1"></i> Choose your model
+                            </label>
+                            <div class="relative">
+                                <select 
+                                    id="modelSelect" 
+                                    class="p-2.5 text-sm text-gray-800 bg-white/90 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-300/50 focus:border-white backdrop-blur-sm appearance-none cursor-pointer"
+                                >
+                                    <option value="naive_bayes">Naive Bayes</option>
+                                    <option value="bilstm">BiLSTM</option>
+                                </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <i class="fas fa-chevron-down text-gray-600 text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Input Section -->
                     <div class="space-y-4">
                         <label for="textInput" class="block text-lg font-medium text-white">
@@ -176,7 +216,7 @@
                             <textarea 
                                 id="textInput" 
                                 placeholder="Share your thoughts about the movie... Was it a masterpiece, mediocre, or a disappointment?"
-                                class="w-full h-32 p-4 text-gray-800 bg-white/90 border border-white/30 rounded-2xl focus:outline-none focus:ring-4 focus:ring-yellow-300/50 focus:border-white transition-all duration-300 resize-none text-lg backdrop-blur-sm"
+                                class="w-full h-56 p-4 text-gray-800 bg-white/90 border border-white/30 rounded-2xl focus:outline-none focus:ring-4 focus:ring-yellow-300/50 focus:border-white transition-all duration-300 resize-none text-lg backdrop-blur-sm"
                                 maxlength="1000" autocomplete="off"
                             ></textarea>
                             <div class="absolute bottom-3 right-3 text-sm text-gray-500">
@@ -210,7 +250,7 @@
             <div class="text-center mt-8">
                 <p class="text-white/60 text-sm">
                     <i class="fas fa-popcorn mr-1"></i>
-                    AI-powered movie review sentiment analysis • Classify reviews as positive, neutral, or negative
+                    AI-powered movie review sentiment analysis • Choose between Naive Bayes and BiLSTM models
                 </p>
             </div>
         </div>
@@ -219,6 +259,7 @@
     <script>
         // DOM Elements
         const textInput = document.getElementById('textInput');
+        const modelSelect = document.getElementById('modelSelect');
         const analyzeBtn = document.getElementById('analyzeBtn');
         const btnText = document.getElementById('btnText');
         const typingIndicator = document.querySelector('.typing-indicator');
@@ -244,7 +285,7 @@
         });
 
         // Call Flask backend for sentiment analysis
-        async function analyzeSentiment(text) {
+        async function analyzeSentiment(text, model) {
             try {
                 const response = await fetch(`${BACKEND_URL}/predict`, {
                     method: 'POST',
@@ -252,7 +293,8 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        text: text
+                        text: text,
+                        model: model
                     })
                 });
 
@@ -272,7 +314,8 @@
                     isPositive: data.is_positive,
                     isNeutral: data.is_neutral,
                     confidence: data.confidence,
-                    rawProbability: data.raw_probability
+                    rawProbability: data.raw_probability,
+                    modelUsed: data.model_used || model
                 };
 
             } catch (error) {
@@ -305,9 +348,36 @@
             }, 100);
         }
 
+        // Get model display info
+        function getModelInfo(model) {
+            switch(model) {
+                case 'naive_bayes':
+                    return {
+                        name: 'Naive Bayes',
+                        tag: 'NB',
+                        tagClass: 'model-naive-bayes',
+                        description: 'Traditional ML'
+                    };
+                case 'bilstm':
+                    return {
+                        name: 'BiLSTM',
+                        tag: 'LSTM',
+                        tagClass: 'model-bilstm',
+                        description: 'Deep Learning'
+                    };
+                default:
+                    return {
+                        name: 'Unknown',
+                        tag: '?',
+                        tagClass: 'bg-gray-500',
+                        description: 'Unknown Model'
+                    };
+            }
+        }
+
         // Create result display
         function displayResult(result) {
-            const { sentiment, score, confidence, isPositive, isNeutral, rawProbability } = result;
+            const { sentiment, score, confidence, isPositive, isNeutral, rawProbability, modelUsed } = result;
             
             let gradientClass, icon, sentimentText, textColor, recommendation, thresholdText;
             
@@ -349,6 +419,9 @@
                 classificationText = 'Skip';
             }
             
+            // Get model info
+            const modelInfo = getModelInfo(modelUsed);
+            
             resultSection.innerHTML = `
                 <div class="bg-white/10 rounded-2xl p-6 border border-white/20">
                     <div class="text-center mb-6">
@@ -356,6 +429,10 @@
                             <i class="fas fa-chart-bar mr-2"></i>
                             Review Analysis Complete
                         </h3>
+                        <div class="flex justify-center items-center mt-2">
+                            <span class="model-tag ${modelInfo.tagClass} mr-2">${modelInfo.tag}</span>
+                            <span class="text-white/70 text-sm">Analyzed with ${modelInfo.name} model</span>
+                        </div>
                     </div>
                     
                     <div class="grid md:grid-cols-2 gap-6">
@@ -387,7 +464,7 @@
                     
                     <!-- Additional Info -->
                     <div class="mt-6 bg-white/10 rounded-xl p-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-white text-sm text-center">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-white text-sm text-center">
                             <div>
                                 <i class="fas fa-brain mr-2 text-yellow-400"></i>
                                 <span>Confidence: ${confidencePercentage}%</span>
@@ -399,6 +476,10 @@
                             <div>
                                 <i class="fas fa-percentage mr-2 text-blue-400"></i>
                                 <span>Raw Score: ${rawProbabilityPercentage}%</span>
+                            </div>
+                            <div>
+                                <i class="fas fa-robot mr-2 text-purple-400"></i>
+                                <span>Model: ${modelInfo.name}</span>
                             </div>
                         </div>
                     </div>
@@ -414,6 +495,7 @@
         // Analyze button click handler
         analyzeBtn.addEventListener('click', async function() {
             const text = textInput.value.trim();
+            const selectedModel = modelSelect.value;
             
             if (!text) {
                 // Shake animation for empty input
@@ -433,8 +515,8 @@
             resultSection.classList.remove('show');
             
             try {
-                // Call the Flask backend
-                const result = await analyzeSentiment(text);
+                // Call the Flask backend with selected model
+                const result = await analyzeSentiment(text, selectedModel);
                 displayResult(result);
             } catch (error) {
                 console.error('Analysis failed:', error);
@@ -453,6 +535,16 @@
                 e.preventDefault();
                 analyzeBtn.click();
             }
+        });
+
+        // Model selection change handler
+        modelSelect.addEventListener('change', function() {
+            // Hide results when model changes
+            resultSection.classList.remove('show');
+            
+            // Optional: Show a subtle indication that model changed
+            const modelInfo = getModelInfo(this.value);
+            console.log(`Switched to ${modelInfo.name} model`);
         });
 
         // Add some sample movie review texts on page load (now including neutral examples)
