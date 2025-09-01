@@ -1,3 +1,58 @@
+r"""Implements and trains a Bidirectional LSTM neural network.
+
+The script provides a complete deep learning pipeline for text classification using PyTorch. It includes:
+    - Custom PyTorch Dataset class for IMDB data loading
+    - Bidirectional LSTM architecture with dropout and layer normalization
+    - Early stopping mechanism to prevent overfitting
+    - Stratified k-fold cross-validation (5 folds)
+    - Comprehensive training and testing evaluation
+    - Model persistence and metrics logging
+
+**Architecture Components**:
+    - Embedding layer with padding index support (max 300 tokens)
+    - Embedding dropout (0.4)
+    - Bidirectional LSTM layer
+    - Layer normalization on concatenated hidden states
+    - Final dropout (0.6) and linear classification layer
+
+**Model Hyperparameters**:
+    - Vocabulary size: Dynamic (from tokenized data)
+    - Embedding dimension: 100
+    - Hidden dimension: 64
+    - Output dimension: 2 (binary classification)
+    - Bidirectional: True
+
+**Training Configuration**:
+    - Device: CUDA if available, otherwise CPU
+    - Batch size: 64 (training), 32 (testing)
+    - Learning rate: 1e-3 with ReduceLROnPlateau scheduler
+    - Weight decay: 1e-4
+    - Max epochs: 30 per fold
+    - Early stopping: 8 epochs patience with 0.01 minimum delta
+
+For **Data Processing Pipeline** see: inputs/multithreading_performance.py
+
+**Training Process**:
+    1. **K-Fold Cross-Validation**: 5-fold stratified split
+    2. **Per-Fold Training**: Train model with early stopping
+    3. **Validation**: Monitor performance on validation set
+    4. **Best Model Selection**: Save model with lowest validation loss
+    5. **Metrics Collection**: Store accuracies and losses for each fold
+
+**Testing Process**:
+    1. Load best trained model
+    2. Process test data through same preprocessing pipeline
+    3. Evaluate on test set with comprehensive metrics
+    4. Generate predictions and performance statistics
+
+**Evaluation Metrics**:
+    - Accuracy: Overall classification accuracy
+    - Precision: True positive rate
+    - Recall: Sensitivity/true positive rate
+    - F1-score: Harmonic mean of precision and recall
+    - Confusion Matrix: Detailed classification breakdown
+"""
+
 import os
 import pandas as pd
 import numpy as np
@@ -8,6 +63,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.utils import shuffle
 from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 import torch
 import torch.nn as nn
@@ -32,6 +88,13 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f"device = {device}")
 
 class IMDB(Dataset):
+    r"""Custom PyTorch Dataset for loading IMDB movie review data.
+
+    - `__init__(root_dir, transform=None)`: Initialize dataset with data directory path
+    - `__len__()`: Returns total number of samples in dataset
+    - `__getitem__(idx)`: Returns sample and label at given index
+    """
+
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
@@ -40,7 +103,7 @@ class IMDB(Dataset):
         self.data, self.labels = load.load_data(root_dir)
 
     def __len__(self):
-        return len(self.data)
+        return len(self.labels)
 
     def __getitem__(self, idx):
         sample = self.data[idx]
@@ -53,6 +116,12 @@ class IMDB(Dataset):
 
 
 class BiLSTM(nn.Module):
+    r"""Bidirectional LSTM neural network architecture
+
+    - `__init__(vocab_size, embed_dim, hidden_dim, output_dim, pad_idx)`: Initialize network layers
+    - `forward(x)`: Forward pass through the network
+    """
+
     def __init__(self, vocab_size, embed_dim, hidden_dim, output_dim, pad_idx):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=pad_idx)
@@ -72,6 +141,12 @@ class BiLSTM(nn.Module):
 
 
 class EarlyStopping:
+    r""" Monitors validation loss and stops training when no improvement.
+
+    - `__init__(patience=10, min_delta=0.0)`: Configure patience and minimum improvement threshold
+    - `__call__(val_loss)`: Check if training should stop based on validation loss
+    """
+
     def __init__(self, patience=10, min_delta=0.0):
         self.patience = patience
         self.min_delta = min_delta
@@ -91,8 +166,11 @@ class EarlyStopping:
 
 if not (os.path.exists('models/BiLSTM_SK5Fold_best.pth') and os.path.getsize('models/BiLSTM_SK5Fold_best.pth') > 0):
     print("No pre-trained model available.")
-    print("\n-----------Training the model-----------")
 
+    print("\n")
+    print("=" * 50)
+    print("TRAINING THE MODEL")
+    print("=" * 50)
     path_to_train_pos_data = 'data/raw/train/pos'
     path_to_train_neg_data = 'data/raw/train/neg'
 
@@ -229,17 +307,14 @@ if not (os.path.exists('models/BiLSTM_SK5Fold_best.pth') and os.path.getsize('mo
             val_acc = round(float(val_correct) / val_total * 100, 2)
             avg_val_loss = val_loss / len(val_loader)
 
-            # Store validation metrics for this epoch
             val_fold_accuracies.append(val_acc)
             val_fold_losses.append(avg_val_loss)
 
-            # Use average loss for scheduler and early stopping
             scheduler.step(avg_val_loss)
             curr_lr = scheduler.get_last_lr()
 
             print(f"Validation Accuracy: {val_acc} | Validation Loss: {avg_val_loss:.4f} | Learning Rate: {curr_lr}\n")
 
-            # Use average loss for early stopping and best model tracking
             if avg_val_loss < best_val_loss:
                 best_val_loss = avg_val_loss
                 best_model_state = model.state_dict().copy()
@@ -270,7 +345,11 @@ if not (os.path.exists('models/BiLSTM_SK5Fold_best.pth') and os.path.getsize('mo
 
 # Testing
 
-print("-----------Testing the pre-trained model-----------")
+print("\n")
+print("=" * 50)
+print("TESTING THE PRE-TRAINED MODEL")
+print("=" * 50)
+
 path_to_test_pos_data = 'data/raw/test/pos'
 path_to_test_neg_data = 'data/raw/test/neg'
 
@@ -290,7 +369,6 @@ for i in range(len(neg_test_data)):
     sample, label = neg_test_data[i]
     test_samples.append(sample)
     test_labels.append(label)
-
 
 preprocess = Preprocess()
 test_samples = preprocess.process_data(test_samples)
@@ -328,6 +406,9 @@ def test_model(model, test_loader):
     test_accuracies = []
     test_losses = []
 
+    all_preds = []
+    all_labels = []
+
     with torch.no_grad():
         loop = tqdm(enumerate(test_loader), total=len(test_loader), leave=True)
         for batch_idx, (text, labels) in loop:
@@ -346,10 +427,18 @@ def test_model(model, test_loader):
             test_accuracies.append(acc)
             test_losses.append(loss.item())
 
+            all_preds.extend(predictions.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+
             loop.set_postfix(accuracy = float(acc),
                             loss = loss.item())
 
     print(f'Correct predictions: {test_num_correct}/{test_num_samples}')
+    print("Accuracy:", accuracy_score(all_labels, all_preds))
+    print("Precision:", precision_score(all_labels, all_preds, average='binary'))
+    print("Recall:", recall_score(all_labels, all_preds, average='binary'))
+    print("F1-score:", f1_score(all_labels, all_preds, average='binary'))
+    print("Confusion Matrix:\n", confusion_matrix(all_labels, all_preds))
 
     with open('data/interim/test_metrics.pkl', 'wb') as file:
         pickle.dump({
@@ -362,4 +451,3 @@ model = model.to(device)
 
 print("testing...")
 test_model(model, test_loader)
- 

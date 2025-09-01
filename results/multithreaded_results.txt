@@ -1,0 +1,17 @@
+MULTITHREADED PERFORMANCE SUMMARY
+============================================================
+Total execution time: 105.0900s
+Total CPU time: 80.9531s
+Memory used: 323.36 MB
+Peak memory: 464.86 MB
+Overall CPU efficiency: 77.0%
+Timestamp: 2025-08-23 16:46:05
+
+MULTITHREADED PERFORMANCE SUMMARY
+============================================================
+Total execution time: 95.5241s
+Total CPU time: 70.6562s
+Memory used: 324.16 MB
+Peak memory: 465.41 MB
+Overall CPU efficiency: 74.0%
+Timestamp: 2025-08-23 18:50:12

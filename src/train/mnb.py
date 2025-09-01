@@ -1,8 +1,25 @@
+r"""Trains and evaluates a Multinomial Naive Bayes classifier for text classification.
+
+This script implements a complete machine learning pipeline for text classification using
+Multinomial Naive Bayes.
+
+The training pipeline includes:
+    - Data loading from positive and negative sample directories
+    - Text preprocessing (tokenization, cleaning, lemmatization)
+    - Feature extraction using count vectorization
+    - Label encoding for categorical targets
+    - Model training with Multinomial Naive Bayes
+    - Cross-validation and performance evaluation
+    - Model persistence for future inference
+
+The model is then tested on IMDB test set.
+"""
+
 import os
 import pickle
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import cross_val_score, StratifiedKFold
-from sklearn.metrics import confusion_matrix, precision_score, recall_score
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
 from sklearn.utils import shuffle
 from tqdm import tqdm
 from definitions import ROOT_DIR
@@ -10,7 +27,6 @@ from src.inputs.load import Load
 from src.inputs.preprocess import Preprocess
 from src.features.count_vectorizer import countVectorizer
 from src.features.mapping import labelEncoder
-
 
 os.chdir(ROOT_DIR)
 
@@ -22,7 +38,11 @@ if not (os.path.exists('data/interim/mnb_features.pkl') and os.path.getsize('dat
         or not (os.path.exists('data/interim/mnb_labels.pkl') and os.path.getsize('data/interim/mnb_labels.pkl') > 0) \
         or not (os.path.exists('models/best_count_vectorizer.pkl') and os.path.getsize('models/best_count_vectorizer.pkl') > 0):
 
-    print("____________Training the model____________")
+
+    print("\n")
+    print("=" * 60)
+    print("TRAINING THE MODEL")
+    print("=" * 60)
 
     load = Load()
     raw_train_pos, train_pos_labels = load.load_data(path_to_train_pos_data)
@@ -59,14 +79,13 @@ else:
     with open('data/interim/mnb_labels.pkl', 'rb') as file:
         labels = pickle.load(file)
 
-print("\n\n____________Train Predictions____________")
+print("=" * 50)
+print("TRAIN PREDICTIONS")
+print("=" * 50)
 
 mnb = MultinomialNB()
 mnb.fit(features, labels)
 train_preds = mnb.predict(features)
-
-score = mnb.score(features, labels)
-print("Naive Bayes Score:", score)
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 scores = cross_val_score(mnb, features, labels, cv=cv)
@@ -97,7 +116,10 @@ if not (os.path.exists('data/interim/mnb_test_features.pkl') and os.path.getsize
     with open('models/best_count_vectorizer.pkl', 'rb') as file:
         best_count_vectorizer = pickle.load(file)
 
-    print("\n\n____________Testing the model____________")
+    print("\n")
+    print("=" * 60)
+    print("TESTING THE MODEL")
+    print("=" * 60)
 
     load = Load()
     raw_test_pos, test_pos_labels = load.load_data(path_to_test_pos_data)
@@ -132,12 +154,15 @@ else:
     with open('models/multinomial_naive_bayes.pkl', 'rb') as file:
         mnb = pickle.load(file)
 
-print("\n\n____________Test Predictions____________")
+print("\n")
+print("=" * 50)
+print("TEST PREDICTIONS")
+print("=" * 50)
 
 test_preds = mnb.predict(test_features)
 
-mnb_test_score = mnb.score(test_features, test_labels)
-print(f"Naive Bayes test score: {mnb_test_score}")
+test_acc = accuracy_score(test_labels, test_preds)
+print(f"Test accuracy score: {test_acc}")
 
 test_precision = precision_score(test_labels, test_preds)
 print(f"Test precision score: {test_precision}")

@@ -7,13 +7,22 @@ import warnings
 
 
 class countVectorizer:
+    r"""Applies sklearn's `CountVectorizer()` to a series of tokens.
+
+    Also performs randomized hyperparameter search using a Naive Bayes classifier
+    to find the best vectorizer configuration.
+
+    Returns the fitted CountVectorizer and the corresponding document-term matrix.
+
+    See: https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html
+    """
+
     def __init__(self):
         print("vectorizing..")
         warnings.simplefilter('ignore')
 
     def dummy(self, doc):
         return doc
-
 
     def vectorize(self, tokens, labels):
         pipe = Pipeline([
@@ -28,7 +37,6 @@ class countVectorizer:
             'vect__max_df': uniform(0.7, 0.3),
             'vect__min_df': randint(1, 4),
             'vect__ngram_range': [(1, 1), (1, 2)],
-            'clf__alpha': uniform(0.1, 1.0)
         }
 
         random_search = RandomizedSearchCV(

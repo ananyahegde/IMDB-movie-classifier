@@ -1,0 +1,17 @@
+SINGLE-THREADED PERFORMANCE SUMMARY
+============================================================
+Total execution time: 285.9030s
+Total CPU time: 74.1406s
+Memory used: 161.84 MB
+Peak memory: 303.54 MB
+Overall CPU efficiency: 25.9%
+Timestamp: 2025-08-23 16:53:40
+
+SINGLE-THREADED PERFORMANCE SUMMARY
+============================================================
+Total execution time: 297.2081s
+Total CPU time: 62.0938s
+Memory used: 158.61 MB
+Peak memory: 300.90 MB
+Overall CPU efficiency: 20.9%
+Timestamp: 2025-08-23 19:00:59

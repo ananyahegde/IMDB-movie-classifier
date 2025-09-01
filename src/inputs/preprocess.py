@@ -8,6 +8,28 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 
 class Preprocess:
+    r"""Preprocesses raw text input and returns the cleaned, tokenized output.
+
+    The preprocessing pipeline includes:
+        - lowercasing
+        - punctuation removal
+        - tokenization
+        - stopword removal
+        - lemmatization
+
+    **methods**:
+
+    - `download_resources()`: Downloads the necessary NLTK resources required for preprocessing.
+    - `to_lower(text: str) -> str`: Converts all characters in the input string to lowercase.
+    - `remove_punkt(text: str) -> str`: Removes HTML break tags and punctuation from the input string.
+    - `tokenize(text: str) -> list[str]`: Splits the input string into individual tokens (words).
+    - `remove_stopwords(tokens: list[str]) -> list[str]`: Filters out common English stopwords.
+    - `lemmatize(tokens: list[str]) -> list[str]`: Lemmatizes each token to its base form.
+    - `preprocess_pipeline(text: str) -> list[str]`: Runs the full preprocessing pipeline on a single string.
+    - `process_data(texts: list[str]) -> list[list[str]]`: Processes a list of raw texts in parallel and returns the preprocessed output.
+    - `process_data(texts: list[str]) -> list[list[str]]`: Processes a list of raw text strings using multithreading. Returns a list of tokenized, cleaned texts.
+    """
+
     def __init__(self):
         print("\npreprocessing data...")
 
