@@ -9,7 +9,7 @@ This is a movie review sentiment classifier built using both machine learning an
   - Naive Bayes – a lightweight, classical machine learning baseline  
   - BiLSTM – a custom-trained deep learning model with contextual understanding  
 - BiLSTM achieves ~85.8% accuracy on the test set  
-- Naive Bayes reaches ~85.3% accuracy, with 87.9% precision and 81.9% recall  
+- Naive Bayes reaches ~82.3% accuracy  
 - GPU support enabled for BiLSTM via PyTorch CUDA  
 - Multithreading for faster data loading and preprocessing  
 - Interactive web interface to input reviews and view results  
